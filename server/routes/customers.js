@@ -16,7 +16,7 @@ export function validateCustomer(b) {
   if (b.email && !validEmail(b.email)) fail(400, 'Invalid e-mail.');
   return {
     type, name: b.name.trim(), company: type === 'commercial' ? b.company.trim() : null, phone, alt_phone: alt,
-    email: b.email?.trim().toLowerCase() || null, language: b.language === 'es' ? 'es' : 'en',
+    email: b.email?.trim().toLowerCase() || null, language: ['es', 'pt'].includes(b.language) ? b.language : 'en',
     sms_opt_in: b.sms_opt_in ? 1 : 0, notes: b.notes?.trim() || null,
   };
 }

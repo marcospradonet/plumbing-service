@@ -70,9 +70,10 @@ export default function catalogRoutes(db) {
     if (!(dur >= 15 && dur <= 600)) fail(400, 'Duration must be between 15 and 600 minutes.');
     const price = Math.round(Number(b.base_price_cents || 0));
     if (!(price >= 0)) fail(400, 'Invalid price.');
-    const vals = [b.name.trim(), b.name_es?.trim() || null, b.category, b.description?.trim() || null, dur, b.price_type, price, b.online ? 1 : 0, b.active === false ? 0 : 1];
-    if (id) db.prepare('UPDATE services SET name=?, name_es=?, category=?, description=?, duration_min=?, price_type=?, base_price_cents=?, online=?, active=? WHERE id=?').run(...vals, id);
-    else id = Number(db.prepare('INSERT INTO services (name, name_es, category, description, duration_min, price_type, base_price_cents, online, active) VALUES (?,?,?,?,?,?,?,?,?)').run(...vals).lastInsertRowid);
+    const vals = [b.name.trim(), b.name_es?.trim() || null, b.name_pt?.trim() || null, b.category, b.description?.trim() || null,
+      b.description_es?.trim() || null, b.description_pt?.trim() || null, dur, b.price_type, price, b.online ? 1 : 0, b.active === false ? 0 : 1];
+    if (id) db.prepare('UPDATE services SET name=?, name_es=?, name_pt=?, category=?, description=?, description_es=?, description_pt=?, duration_min=?, price_type=?, base_price_cents=?, online=?, active=? WHERE id=?').run(...vals, id);
+    else id = Number(db.prepare('INSERT INTO services (name, name_es, name_pt, category, description, description_es, description_pt, duration_min, price_type, base_price_cents, online, active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run(...vals).lastInsertRowid);
     audit(db, req, 'save', 'service', id, b.name);
     return id;
   }

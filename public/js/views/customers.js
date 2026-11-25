@@ -1,6 +1,6 @@
 // Customers (residential and business) and their service addresses (EP03).
 import {
-  address, api, closeModal, dateShort, esc, modal, money, phoneFmt, readForm, state, statusTag, telLink, time12, toast,
+  address, api, closeModal, LANGUAGES, langTag, dateShort, esc, modal, money, phoneFmt, readForm, state, statusTag, telLink, time12, toast,
 } from '../core.js';
 import { newJob, openJob } from '../jobdialogs.js';
 
@@ -17,7 +17,7 @@ const customerFields = (c = {}) => `
   <label>Mobile phone<input name="phone" type="tel" value="${esc(phoneFmt(c.phone))}" placeholder="(305) 555-0123" required></label>
   <label>Alternate phone<input name="alt_phone" type="tel" value="${esc(phoneFmt(c.alt_phone))}"></label>
   <label>E-mail<input name="email" type="email" value="${esc(c.email || '')}"></label>
-  <label>Language<select name="language"><option value="en">English</option><option value="es" ${c.language === 'es' ? 'selected' : ''}>Español</option></select></label>
+  <label>Language<select name="language">${Object.entries(LANGUAGES).map(([k, v]) => `<option value="${k}" ${c.language === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
   <label class="check wide"><input type="checkbox" name="sms_opt_in" ${c.sms_opt_in ? 'checked' : ''}> Customer agreed to receive appointment text messages (SMS)</label>
   <label class="wide">Notes (billing terms, preferences)<textarea name="notes">${esc(c.notes || '')}</textarea></label>`;
 
@@ -50,7 +50,7 @@ export async function render(el, params, page) {
     const list = await api('/customers?q=' + encodeURIComponent(q.value.trim()));
     el.querySelector('[data-rows]').innerHTML = list.map((c) => `<tr class="clickable" data-id="${c.id}" tabindex="0">
       <td><strong>${esc(c.company || c.name)}</strong>${c.company ? `<br><small>${esc(c.name)}</small>` : ''}</td>
-      <td><span class="tag">${c.type === 'commercial' ? 'Business' : 'Residential'}</span> ${c.language === 'es' ? '<span class="tag">ES</span>' : ''}</td>
+      <td><span class="tag">${c.type === 'commercial' ? 'Business' : 'Residential'}</span> ${langTag(c.language)}</td>
       <td>${esc(phoneFmt(c.phone))}</td><td>${esc(c.email || '')}</td><td class="num">${c.properties_count}</td>
       <td>${c.last_job ? esc(dateShort(c.last_job)) : '—'}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No customers found.</td></tr>';
     el.querySelectorAll('[data-id]').forEach((r) => {
@@ -97,7 +97,7 @@ async function renderDetail(el, id, page) {
         <dt>Contact</dt><dd>${esc(c.name)}</dd>
         <dt>Phone</dt><dd>${telLink(c.phone)}${c.alt_phone ? ' · ' + telLink(c.alt_phone) : ''}</dd>
         <dt>E-mail</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '—'}</dd>
-        <dt>Language</dt><dd>${c.language === 'es' ? 'Español' : 'English'}</dd>
+        <dt>Language</dt><dd>${LANGUAGES[c.language] || 'English'}</dd>
         <dt>Text messages</dt><dd>${c.sms_opt_in ? '<span class="tag ok">Opted in</span>' : '<span class="tag">Not opted in</span>'}</dd>
         <dt>Billed (completed)</dt><dd>${money(c.billed_cents)}</dd>
         ${c.notes ? `<dt>Notes</dt><dd>${esc(c.notes)}</dd>` : ''}

@@ -1,7 +1,7 @@
 # Plumbing Service — scheduling & dispatch (v0.1)
 
 Scheduling platform for a plumbing company based in **Miami, Florida** that serves **houses and small buildings**
-for **residential customers and small businesses**. Customers book online in English or Spanish; the office
+for **residential customers and small businesses**. Customers book online in English, Spanish or Brazilian Portuguese; the office
 dispatches jobs on a board; technicians run their day from a phone.
 
 Built on the same architecture as `marcospradonet/clinica-fono`: Node.js + Express, embedded SQLite
@@ -36,14 +36,14 @@ Password for every demo user: `plumbing123`. Delete the `data/` folder to start 
 
 | Area | What it does |
 |---|---|
-| **Online booking** (`/book`) | English/Spanish; ZIP coverage check; service catalog with flat/hourly/estimate pricing; free arrival windows from qualified technicians; residential or business customer, property type, units, access notes; SMS consent; booking reference. |
+| **Online booking** (`/book`) | English / Español / Português (pt-BR); ZIP coverage check; service catalog with flat/hourly/estimate pricing; free arrival windows from qualified technicians; residential or business customer, property type, units, access notes; SMS consent; booking reference. |
 | **Self-service** | Reference + phone → confirm, reschedule or cancel until the cutoff (default 24 h). Emergency line always visible. |
 | **Dispatch board** | Day view with a column per technician, week view per technician, off-hours and time off shaded, now-line, travel buffer drawn after each job, drag & drop to move/reassign, click an empty slot to create a job. |
 | **Rules** | No overlaps (with each technician's travel buffer), skills per service category, working hours (emergency jobs may go after hours with a fee), time off, min notice, booking window, closed days, least-loaded technician auto-assignment. |
 | **Jobs** | Unassigned request queue, filters, detail with map link, access notes, internal/completion notes, billable items (parts, labor, fees, discounts) in USD, history and messages, printable work order. |
 | **Technician** | "My day", one-tap *On my way* (texts the customer), *Start*, *Complete*, *No access*; items locked after completion (manager can reopen). |
 | **Customers** | Residential or business (HOA, property managers, restaurants…), several service addresses, job history and billed total. |
-| **Notifications** | Bilingual SMS/e-mail on booking, reschedule, cancellation, reminder (default 24 h before), on the way and completion. Outbox with retries. |
+| **Notifications** | SMS/e-mail in the customer's language (en/es/pt) on booking, reschedule, cancellation, reminder (default 24 h before), on the way and completion. Outbox with retries. |
 | **Setup** | Technicians (license #, skills, color, buffer, weekly hours), services, service-area ZIPs, business settings, users with roles and optional TOTP 2FA, audit log. |
 
 Times are stored as local wall-clock text in `America/New_York` (override with `BUSINESS_TZ`).

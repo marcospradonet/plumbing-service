@@ -47,8 +47,11 @@ CREATE TABLE IF NOT EXISTS services (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   name_es TEXT,
+  name_pt TEXT,
   category TEXT NOT NULL,
   description TEXT,
+  description_es TEXT,
+  description_pt TEXT,
   duration_min INTEGER NOT NULL DEFAULT 60,
   price_type TEXT NOT NULL DEFAULT 'flat' CHECK (price_type IN ('flat','hourly','estimate')),
   base_price_cents INTEGER NOT NULL DEFAULT 0,
@@ -84,7 +87,7 @@ CREATE TABLE IF NOT EXISTS customers (
   phone TEXT NOT NULL,                -- E.164
   alt_phone TEXT,
   email TEXT,
-  language TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en','es')),
+  language TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en','es','pt')),
   sms_opt_in INTEGER NOT NULL DEFAULT 0,
   notes TEXT,
   source TEXT NOT NULL DEFAULT 'office',
@@ -196,9 +199,53 @@ export function openDb(file = path.join(DATA_DIR, 'plumbing.db')) {
   if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });
   const db = new DatabaseSync(file);
   db.exec(SCHEMA);
+  migrate(db);
   const ins = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   for (const [k, v] of Object.entries(DEFAULT_SETTINGS)) ins.run(k, v);
   return db;
+}
+
+/** Upgrades databases created by earlier versions (v0.1: no Portuguese). */
+function migrate(db) {
+  const cols = db.prepare('PRAGMA table_info(services)').all().map((c) => c.name);
+  for (const c of ['name_pt', 'description_es', 'description_pt']) {
+    if (!cols.includes(c)) db.exec(`ALTER TABLE services ADD COLUMN ${c} TEXT`);
+  }
+  translateServices(db);
+  // Widen the customers.language CHECK to accept 'pt' (SQLite needs a table rebuild).
+  const sql = db.prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'customers'`).get()?.sql || '';
+  if (sql.includes("language IN ('en','es')")) {
+    db.exec('PRAGMA foreign_keys = OFF');
+    db.exec('BEGIN');
+    try {
+      db.exec(`CREATE TABLE customers_new ${sql.slice(sql.indexOf('(')).replace("language IN ('en','es')", "language IN ('en','es','pt')")}`);
+      db.exec('INSERT INTO customers_new SELECT * FROM customers');
+      db.exec('DROP TABLE customers');
+      db.exec('ALTER TABLE customers_new RENAME TO customers');
+      db.exec('CREATE INDEX IF NOT EXISTS ix_customers_phone ON customers(phone)');
+      db.exec('CREATE INDEX IF NOT EXISTS ix_customers_name ON customers(name COLLATE NOCASE)');
+      db.exec('COMMIT');
+    } catch (e) { db.exec('ROLLBACK'); throw e; } finally { db.exec('PRAGMA foreign_keys = ON'); }
+  }
+}
+
+/** Spanish and Portuguese names/descriptions of the standard services (keyed by English name). */
+const SERVICE_I18N = {
+  'Drain cleaning': ['Destape de drenajes', 'Desentupimento de ralos e pias', 'Drenaje tapado de cocina, baño o lavandería. Incluye destape con sonda.', 'Entupimento de pia, banheiro ou lavanderia. Desentupimento com sonda incluído.'],
+  'Toilet repair / unclog': ['Reparación de inodoro', 'Conserto / desentupimento de vaso sanitário', 'Inodoro que gotea, pierde agua o está tapado.', 'Vaso sanitário vazando, com descarga disparada ou entupido.'],
+  'Faucet or fixture installation': ['Instalación de grifos o accesorios', 'Instalação de torneiras e acessórios', 'Accesorios del cliente o de nuestro inventario.', 'Peças fornecidas pelo cliente ou do nosso estoque.'],
+  'Leak detection & repair': ['Detección y reparación de fugas', 'Detecção e conserto de vazamentos', 'Fugas visibles u ocultas, detección de fugas bajo la losa.', 'Vazamentos visíveis ou ocultos, inclusive sob o piso (laje).'],
+  'Water heater repair': ['Reparación de calentador de agua', 'Conserto de aquecedor de água', 'De tanque o sin tanque; el cargo de diagnóstico se aplica a la reparación.', 'Com reservatório ou de passagem; a taxa de diagnóstico é abatida do conserto.'],
+  'Water heater replacement': ['Reemplazo de calentador de agua', 'Troca de aquecedor de água', 'Retiro, instalación y permiso. Se programa después del estimado.', 'Remoção, instalação e licença. Agendado após o orçamento.'],
+  'Sewer camera inspection': ['Inspección con cámara de alcantarillado', 'Inspeção de esgoto com câmera', 'Inspección en video de la línea principal con informe.', 'Inspeção em vídeo da tubulação principal, com relatório.'],
+  'Backflow test & certification': ['Prueba y certificación de backflow', 'Teste e certificação de backflow', 'Prueba anual del preventor de reflujo registrada en Miami-Dade WASD.', 'Teste anual do dispositivo antirrefluxo, registrado no Miami-Dade WASD.'],
+  'Repiping consultation': ['Consulta de cambio de tuberías', 'Avaliação para troca de tubulação', 'Estimado gratis en sitio para cambiar la tubería de la casa o edificio.', 'Orçamento gratuito no local para trocar a tubulação da casa ou do prédio.'],
+  'Emergency service': ['Servicio de emergencia', 'Atendimento de emergência', 'Tubería rota, aguas negras, sin agua. Llame a nuestra línea 24/7.', 'Cano estourado, retorno de esgoto, falta de água. Ligue para nossa linha 24h.'],
+};
+function translateServices(db) {
+  const up = db.prepare(`UPDATE services SET name_es = COALESCE(name_es, ?), name_pt = COALESCE(name_pt, ?),
+    description_es = COALESCE(description_es, ?), description_pt = COALESCE(description_pt, ?) WHERE name = ?`);
+  for (const [name, t] of Object.entries(SERVICE_I18N)) up.run(...t, name);
 }
 
 const txDepth = new WeakMap();
@@ -260,6 +307,7 @@ export function seed(db, now) {
     svc.run('Backflow test & certification', 'Prueba y certificación de backflow', 'inspection', 'Annual backflow preventer test filed with Miami-Dade WASD.', 60, 'flat', 12900, 1);
     svc.run('Repiping consultation', 'Consulta de cambio de tuberías', 'repipe', 'Free on-site estimate for whole-house or building repipe.', 60, 'estimate', 0, 1);
     svc.run('Emergency service', 'Servicio de emergencia', 'general', 'Burst pipe, sewage backup, no water. Call our 24/7 line.', 90, 'hourly', 19500, 0);
+    translateServices(db);
 
     const tech = db.prepare(`INSERT INTO technicians (name, phone, license_no, skills, color, travel_buffer_min) VALUES (?, ?, ?, ?, ?, ?)`);
     const t1 = tech.run('Carlos Rivera', '+13055550111', 'CFC1430001', 'drain,leak,fixture,sewer,general', '#2563eb', 30).lastInsertRowid;

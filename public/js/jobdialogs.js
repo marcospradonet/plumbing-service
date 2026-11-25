@@ -1,7 +1,7 @@
 // Job dialogs shared by the schedule, jobs list, dashboard and customer pages:
 // detail (status workflow, items, history), create and reschedule/assign (with free-slot finder).
 import {
-  addMin, address, api, can, fmtDateTime, closeModal, confirmDialog, customerLabel, customerSearch, dateShort, dateTimeUS, esc, isOffice,
+  addMin, address, api, can, langTag, fmtDateTime, closeModal, confirmDialog, customerLabel, customerSearch, dateShort, dateTimeUS, esc, isOffice,
   mapsLink, minutesBetween, modal, money, prioTag, readForm, serviceOptions, showError, state, statusTag, techOptions, telLink,
   time12, toast,
 } from './core.js';
@@ -38,7 +38,7 @@ export async function openJob(id, onChange = () => {}) {
       <div class="grid-2">
         <dl class="data">
           <dt>Customer</dt><dd>${isOffice() ? `<a href="#/customers/${job.customer_id}" data-close-link>${esc(customerLabel(job))}</a>` : esc(customerLabel(job))}
-            <span class="tag">${job.customer_type === 'commercial' ? 'Business' : 'Residential'}</span> ${job.customer_language === 'es' ? '<span class="tag">Español</span>' : ''}</dd>
+            <span class="tag">${job.customer_type === 'commercial' ? 'Business' : 'Residential'}</span> ${langTag(job.customer_language)}</dd>
           <dt>Phone</dt><dd>${telLink(job.customer_phone)}</dd>
           <dt>Address</dt><dd><a href="${esc(mapsLink(job))}" target="_blank" rel="noopener">${esc(address(job))}</a>
             <br><small>${esc(state.meta.property_types?.[job.property_type] || job.property_type)}${job.units_count ? ` · ${job.units_count} units` : ''}</small></dd>

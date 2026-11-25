@@ -12,33 +12,42 @@ function window(job, settings) {
 
 /** Builds {subject, text} for a job event in the customer's language. */
 export function render(kind, job, settings) {
-  const es = job.customer_language === 'es';
+  const lang = ['es', 'pt'].includes(job.customer_language) ? job.customer_language : 'en';
   const biz = settings.business_name;
-  const service = es ? (job.service_name_es || job.service_name) : job.service_name;
-  const when = `${describeDate(job.starts_at, es ? 'es' : 'en')}, ${window(job, settings)}`;
+  const service = (lang === 'es' && job.service_name_es) || (lang === 'pt' && job.service_name_pt) || job.service_name;
+  const day = describeDate(job.starts_at, lang);
+  const when = `${day}, ${window(job, settings)}`;
   const addr = `${job.address1}${job.unit ? ' #' + job.unit : ''}, ${job.city}`;
   const phone = fmtPhone(settings.business_phone);
+  const ref = job.ref;
+  const tech = job.technician_name;
   const T = {
-    booked: es
-      ? [`Cita confirmada ${job.ref}`, `${biz}: su cita de ${service} está programada para ${when} (llegada) en ${addr}. Ref ${job.ref}. Para cambios: ${phone}.`]
-      : [`Appointment booked ${job.ref}`, `${biz}: your ${service} appointment is set for ${when} (arrival window) at ${addr}. Ref ${job.ref}. Changes: ${phone}.`],
-    rescheduled: es
-      ? [`Cita reprogramada ${job.ref}`, `${biz}: su cita ${job.ref} fue reprogramada para ${when}. Preguntas: ${phone}.`]
-      : [`Appointment rescheduled ${job.ref}`, `${biz}: appointment ${job.ref} was moved to ${when}. Questions: ${phone}.`],
-    cancelled: es
-      ? [`Cita cancelada ${job.ref}`, `${biz}: su cita ${job.ref} del ${describeDate(job.starts_at, 'es')} fue cancelada. Para reprogramar: ${phone}.`]
-      : [`Appointment cancelled ${job.ref}`, `${biz}: appointment ${job.ref} on ${describeDate(job.starts_at)} was cancelled. To rebook: ${phone}.`],
-    reminder: es
-      ? [`Recordatorio ${job.ref}`, `${biz}: recordatorio de su cita de ${service} ${when} en ${addr}. Confirme o cambie con su ref ${job.ref} en nuestra web o al ${phone}.`]
-      : [`Reminder ${job.ref}`, `${biz}: reminder of your ${service} visit ${when} at ${addr}. Confirm or change with ref ${job.ref} on our website or call ${phone}.`],
-    en_route: es
-      ? [`Técnico en camino ${job.ref}`, `${biz}: ${job.technician_name} va en camino a ${addr}.`]
-      : [`Technician on the way ${job.ref}`, `${biz}: ${job.technician_name} is on the way to ${addr}.`],
-    completed: es
-      ? [`Servicio completado ${job.ref}`, `${biz}: gracias, su servicio ${job.ref} fue completado. Le enviaremos la factura por correo.`]
-      : [`Service completed ${job.ref}`, `${biz}: thank you! Job ${job.ref} is complete. Your invoice will follow by e-mail.`],
+    en: {
+      booked: [`Appointment booked ${ref}`, `${biz}: your ${service} appointment is set for ${when} (arrival window) at ${addr}. Ref ${ref}. Changes: ${phone}.`],
+      rescheduled: [`Appointment rescheduled ${ref}`, `${biz}: appointment ${ref} was moved to ${when}. Questions: ${phone}.`],
+      cancelled: [`Appointment cancelled ${ref}`, `${biz}: appointment ${ref} on ${day} was cancelled. To rebook: ${phone}.`],
+      reminder: [`Reminder ${ref}`, `${biz}: reminder of your ${service} visit ${when} at ${addr}. Confirm or change with ref ${ref} on our website or call ${phone}.`],
+      en_route: [`Technician on the way ${ref}`, `${biz}: ${tech} is on the way to ${addr}.`],
+      completed: [`Service completed ${ref}`, `${biz}: thank you! Job ${ref} is complete. Your invoice will follow by e-mail.`],
+    },
+    es: {
+      booked: [`Cita confirmada ${ref}`, `${biz}: su cita de ${service} está programada para ${when} (llegada) en ${addr}. Ref ${ref}. Para cambios: ${phone}.`],
+      rescheduled: [`Cita reprogramada ${ref}`, `${biz}: su cita ${ref} fue reprogramada para ${when}. Preguntas: ${phone}.`],
+      cancelled: [`Cita cancelada ${ref}`, `${biz}: su cita ${ref} del ${day} fue cancelada. Para reprogramar: ${phone}.`],
+      reminder: [`Recordatorio ${ref}`, `${biz}: recordatorio de su cita de ${service} ${when} en ${addr}. Confirme o cambie con su ref ${ref} en nuestra web o al ${phone}.`],
+      en_route: [`Técnico en camino ${ref}`, `${biz}: ${tech} va en camino a ${addr}.`],
+      completed: [`Servicio completado ${ref}`, `${biz}: gracias, su servicio ${ref} fue completado. Le enviaremos la factura por correo.`],
+    },
+    pt: {
+      booked: [`Agendamento confirmado ${ref}`, `${biz}: seu atendimento de ${service} está agendado para ${when} (janela de chegada) em ${addr}. Ref ${ref}. Alterações: ${phone}.`],
+      rescheduled: [`Agendamento remarcado ${ref}`, `${biz}: o agendamento ${ref} foi remarcado para ${when}. Dúvidas: ${phone}.`],
+      cancelled: [`Agendamento cancelado ${ref}`, `${biz}: o agendamento ${ref} de ${day} foi cancelado. Para remarcar: ${phone}.`],
+      reminder: [`Lembrete ${ref}`, `${biz}: lembrete do seu atendimento de ${service} ${when} em ${addr}. Confirme ou altere com a ref ${ref} no nosso site ou pelo ${phone}.`],
+      en_route: [`Técnico a caminho ${ref}`, `${biz}: ${tech} está a caminho de ${addr}.`],
+      completed: [`Serviço concluído ${ref}`, `${biz}: obrigado! O serviço ${ref} foi concluído. A fatura será enviada por e-mail.`],
+    },
   };
-  const [subject, text] = T[kind];
+  const [subject, text] = T[lang][kind];
   return { subject, text };
 }
 

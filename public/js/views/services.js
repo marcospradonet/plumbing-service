@@ -10,7 +10,7 @@ export async function render(el, _params, page) {
     el.innerHTML = `<div class="stack">
     <section class="card"><header><h2>Services</h2></header><div class="table-wrap"><table><thead><tr><th>Service</th><th>Category</th><th class="num">Duration</th><th>Pricing</th><th>Online booking</th><th></th></tr></thead><tbody>
       ${state.services.map((s) => `<tr class="clickable" data-id="${s.id}" style="${s.active ? '' : 'opacity:.55'}">
-        <td><strong>${esc(s.name)}</strong>${s.name_es ? `<br><small lang="es">${esc(s.name_es)}</small>` : ''}</td>
+        <td><strong>${esc(s.name)}</strong>${s.name_es ? `<br><small lang="es">ES: ${esc(s.name_es)}</small>` : ''}${s.name_pt ? `<br><small lang="pt-BR">PT: ${esc(s.name_pt)}</small>` : ''}</td>
         <td>${esc(state.meta.categories?.[s.category] || s.category)}</td><td class="num">${s.duration_min} min</td>
         <td>${esc(PRICE_TYPES[s.price_type])}${s.price_type !== 'estimate' ? ` · ${money(s.base_price_cents)}${s.price_type === 'hourly' ? '/h' : ''}` : ''}</td>
         <td>${s.online ? '<span class="tag ok">Yes</span>' : '<span class="tag">Office only</span>'}</td><td>${s.active ? '' : '<span class="tag">Inactive</span>'}</td></tr>`).join('')}
@@ -36,11 +36,14 @@ export async function render(el, _params, page) {
       body: `<div class="form-grid">
         <label>Name (English)<input name="name" value="${esc(s?.name || '')}" required></label>
         <label>Name (Spanish)<input name="name_es" lang="es" value="${esc(s?.name_es || '')}"></label>
+        <label>Name (Portuguese)<input name="name_pt" lang="pt-BR" value="${esc(s?.name_pt || '')}"></label>
         <label>Category / required skill<select name="category">${Object.entries(state.meta.categories || {}).map(([k, v]) => `<option value="${k}" ${s?.category === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>
         <label>Duration (min)<input name="duration_min" type="number" min="15" step="15" value="${s?.duration_min ?? 60}"></label>
         <label>Pricing<select name="price_type">${Object.entries(PRICE_TYPES).map(([k, v]) => `<option value="${k}" ${s?.price_type === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
         <label>Price (USD)<input name="price" type="number" min="0" step="0.01" value="${s ? (s.base_price_cents / 100).toFixed(2) : '0.00'}"></label>
-        <label class="wide">Description shown to customers<textarea name="description">${esc(s?.description || '')}</textarea></label>
+        <label class="wide">Description shown to customers (English)<textarea name="description">${esc(s?.description || '')}</textarea></label>
+        <label class="wide">Description (Spanish)<textarea name="description_es" lang="es">${esc(s?.description_es || '')}</textarea></label>
+        <label class="wide">Description (Portuguese)<textarea name="description_pt" lang="pt-BR">${esc(s?.description_pt || '')}</textarea></label>
         <label class="check"><input type="checkbox" name="online" ${!s || s.online ? 'checked' : ''}> Bookable online</label>
         ${s ? `<label class="check"><input type="checkbox" name="active" ${s.active ? 'checked' : ''}> Active</label>` : ''}
       </div><p class="form-error" role="alert"></p>`,

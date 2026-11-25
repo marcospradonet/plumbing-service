@@ -33,7 +33,7 @@ export default function publicRoutes(db) {
   }));
 
   r.get('/public/services', (_req, res) => {
-    res.json(db.prepare(`SELECT id, name, name_es, category, description, duration_min, price_type, base_price_cents
+    res.json(db.prepare(`SELECT id, name, name_es, name_pt, category, description, description_es, description_pt, duration_min, price_type, base_price_cents
       FROM services WHERE active = 1 AND online = 1 ORDER BY category, name`).all());
   });
 
@@ -94,7 +94,7 @@ export default function publicRoutes(db) {
     return {
       ref: job.ref, status: job.status, starts_at: job.starts_at, ends_at: job.ends_at,
       arrival_window_min: Number(s.arrival_window_min), service_id: job.service_id,
-      service_name: job.service_name, service_name_es: job.service_name_es,
+      service_name: job.service_name, service_name_es: job.service_name_es, service_name_pt: job.service_name_pt,
       address: `${job.address1}${job.unit ? ' #' + job.unit : ''}, ${job.city}, ${job.state} ${job.zip}`,
       technician: job.technician_name ? job.technician_name.split(' ')[0] : null,
       can_change: OPEN_STATUSES.includes(job.status) && beforeCutoff(db, job),

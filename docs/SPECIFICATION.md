@@ -14,7 +14,7 @@ and automated tests with `node:test`.
 
 | # | Goal |
 |---|---|
-| G1 | Let customers book a plumber online 24/7, in English or Spanish, in under 2 minutes. |
+| G1 | Let customers book a plumber online 24/7, in English, Spanish or Brazilian Portuguese, in under 2 minutes. |
 | G2 | Give the office (dispatchers) one board to see, assign and move every job of the day. |
 | G3 | Never double-book a technician, never send a technician without the right skill, never book outside the service area. |
 | G4 | Keep customers informed by SMS/e-mail (booking, reschedule, cancellation, reminder, "on the way"). |
@@ -24,7 +24,7 @@ and automated tests with `node:test`.
 
 - Time zone **America/New_York** (Eastern, with DST). All times are stored as local wall-clock text `YYYY-MM-DDTHH:MM`.
 - US formats: `MM/DD/YYYY`, 12-hour clock, currency **USD** stored in cents, phones in E.164 `+1XXXXXXXXXX`.
-- Bilingual market: customer preferred language **en / es**; all customer messages have both versions.
+- Multilingual market: customer preferred language **en / es / pt (pt-BR)** — Miami has large Hispanic and Brazilian communities; all customer messages exist in the three languages.
 - Service area defined by **ZIP codes** (seeded with Miami-Dade ZIPs); bookings from other ZIPs are refused online.
 - Florida plumbing contractors are licensed (e.g. `CFC1234567`); the technician record stores the license number.
 - SMS consent (TCPA): reminders and status texts are only sent when the customer opted in; every SMS ends with "Reply STOP to opt out".
@@ -95,7 +95,7 @@ requested ─▶ scheduled ─▶ confirmed ─▶ en_route ─▶ in_progress �
 
 Outbox table with retry (up to 5 attempts, exponential backoff). Channels: **SMS** (Twilio if `TWILIO_*` env vars are set,
 otherwise simulated) and **e-mail** (simulated/logged). Events: booked, rescheduled, cancelled, reminder (configurable hours
-before), technician on the way, job completed. Messages in the customer's language. No message is sent without SMS opt-in
+before), technician on the way, job completed. Messages in the customer's language (en, es or pt-BR). No message is sent without SMS opt-in
 (SMS) or e-mail address (e-mail).
 
 ## 7. User stories (backlog)
@@ -103,7 +103,7 @@ before), technician on the way, job completed. Messages in the customer's langua
 ### EP01 — Online booking (public page `/book`)
 | ID | Story | Acceptance |
 |---|---|---|
-| US01 | As a customer I choose English or Spanish. | Toggle switches all labels; choice saved on the customer record. |
+| US01 | As a customer I choose English, Spanish or Portuguese (pt-BR). | Toggle switches all labels; choice saved on the customer record. |
 | US02 | As a customer I enter my ZIP and learn if it is served. | Unserved ZIP shows the office phone; served ZIP continues. |
 | US03 | As a customer I pick a service and see its price type and starting price. | Only active, online services listed. |
 | US04 | As a customer I pick a day and an arrival window. | Only free windows from qualified technicians; respects lead time, window and closed days. |

@@ -49,30 +49,70 @@ const T = {
     pickNew: 'Elija un nuevo horario', save: 'Guardar nuevo horario', tech: 'Técnico',
     license: 'Licencia FL', changed: 'Cita actualizada.',
   },
+  pt: {
+    tagline: 'Encanadores licenciados e segurados · Miami-Dade', emergency: 'Emergência? Cano estourado ou retorno de esgoto? Ligue 24h:',
+    book: 'Agendar visita', manage: 'Gerenciar meu agendamento',
+    steps: ['Local', 'Serviço', 'Horário', 'Seus dados', 'Pronto'],
+    zipTitle: 'Onde você precisa de um encanador?', zipLabel: 'CEP (ZIP code) do imóvel', next: 'Continuar', back: 'Voltar',
+    zipNo: (p) => `Desculpe, ainda não atendemos este CEP pelo site. Ligue para ${p}.`, zipYes: (c) => `Ótimo! Atendemos ${c}.`,
+    svcTitle: 'Do que você precisa?', flat: 'Preço fixo', hourly: 'por hora', estimate: 'Orçamento grátis', from: 'a partir de',
+    timeTitle: 'Escolha o dia e a janela de chegada', arrival: 'O técnico chega entre', noSlots: 'Não há horários disponíveis pelo site nos próximos dias. Por favor, ligue para nós.',
+    detailsTitle: 'Seus dados', residential: 'Residência', commercial: 'Empresa / prédio',
+    company: 'Nome da empresa ou do condomínio', name: 'Seu nome', phone: 'Celular (número dos EUA)', email: 'E-mail (para confirmação e fatura)',
+    address: 'Endereço', unit: 'Apto / unidade / sala', city: 'Cidade', propType: 'Tipo de imóvel', units: 'Número de unidades (prédios)',
+    access: 'Observações de acesso (código do portão, estacionamento, animais)', problem: 'Descreva o problema', problemPh: 'ex.: a pia da cozinha está entupida e a água volta pela máquina de lavar louça',
+    urgent: 'É urgente (vazamento ativo, falta de água) — vamos tentar priorizar', sms: 'Quero receber avisos do agendamento por SMS. Podem ser cobradas tarifas da operadora. Responda STOP para cancelar.',
+    confirmBtn: 'Confirmar agendamento', summary: 'Resumo',
+    doneTitle: 'Agendamento confirmado!', doneRef: 'Seu número de referência', doneText: 'Enviamos uma confirmação. Guarde sua referência para confirmar, remarcar ou cancelar pelo site.',
+    another: 'Agendar outra visita',
+    manageTitle: 'Encontre seu agendamento', ref: 'Referência (ex.: PL-AB12CD)', find: 'Buscar agendamento',
+    status: { requested: 'Solicitação recebida', scheduled: 'Agendado', confirmed: 'Confirmado', en_route: 'Técnico a caminho', in_progress: 'Em andamento', completed: 'Concluído', cancelled: 'Cancelado', no_access: 'Visita perdida' },
+    confirmVisit: 'Confirmar visita', reschedule: 'Remarcar', cancel: 'Cancelar agendamento', cancelReason: 'Motivo (opcional)',
+    cancelSure: 'Cancelar este agendamento?', cutoff: (h) => `Alterações pelo site são encerradas ${h} horas antes da visita. Ligue para nós para alterar.`,
+    pickNew: 'Escolha um novo horário', save: 'Salvar novo horário', tech: 'Técnico',
+    license: 'Licença FL', changed: 'Agendamento atualizado.',
+  },
 };
-const PROP_ES = { single_family: 'Casa unifamiliar', townhouse: 'Townhouse', condo: 'Condominio / apartamento', small_multifamily: 'Edificio multifamiliar pequeño', small_commercial: 'Local comercial pequeño' };
+const PROPS = {
+  es: { single_family: 'Casa unifamiliar', townhouse: 'Townhouse', condo: 'Condominio / apartamento', small_multifamily: 'Edificio multifamiliar pequeño', small_commercial: 'Local comercial pequeño' },
+  pt: { single_family: 'Casa', townhouse: 'Sobrado (townhouse)', condo: 'Apartamento / condomínio', small_multifamily: 'Prédio residencial pequeno', small_commercial: 'Imóvel comercial pequeno' },
+};
 
-const DAY = { en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], es: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] };
-const MON = { en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'] };
+const DAY = {
+  en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], es: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+  pt: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'],
+};
+const MON = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+  pt: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
+};
 const parse = (s) => new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10), +s.slice(11, 13) || 0, +s.slice(14, 16) || 0);
 const t12 = (s) => { const h = +s.slice(11, 13), m = s.slice(14, 16); return `${((h + 11) % 12) + 1}:${m} ${h < 12 ? 'AM' : 'PM'}`; };
 const plus = (s, min) => { const d = parse(s); d.setMinutes(d.getMinutes() + min); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
 
 const st = {
-  lang: localStorage.getItem('lang') || (navigator.language?.startsWith('es') ? 'es' : 'en'),
+  lang: ['en', 'es', 'pt'].includes(localStorage.getItem('lang')) ? localStorage.getItem('lang')
+    : (['es', 'pt'].find((l) => navigator.language?.startsWith(l)) || 'en'),
   tab: 'book', step: 0, info: null, zip: '', city: '', services: [], service: null, slots: [], day: null, slot: null, details: {}, done: null,
   manage: null, managePhone: '',
 };
 const L = () => T[st.lang];
 const root = document.getElementById('book');
-const dateLabel = (s) => { const d = parse(s); return st.lang === 'es' ? `${DAY.es[d.getDay()]} ${d.getDate()} ${MON.es[d.getMonth()]}` : `${DAY.en[d.getDay()]}, ${MON.en[d.getMonth()]} ${d.getDate()}`; };
+const dateLabel = (s) => {
+  const d = parse(s);
+  if (st.lang === 'es') return `${DAY.es[d.getDay()]} ${d.getDate()} ${MON.es[d.getMonth()]}`;
+  if (st.lang === 'pt') return `${DAY.pt[d.getDay()]}, ${d.getDate()} de ${MON.pt[d.getMonth()]}`;
+  return `${DAY.en[d.getDay()]}, ${MON.en[d.getMonth()]} ${d.getDate()}`;
+};
 const windowLabel = (s) => `${t12(s)} – ${t12(plus(s, st.info.arrival_window_min))}`;
-const svcName = (s) => (st.lang === 'es' && s.service_name_es) || (st.lang === 'es' && s.name_es) || s.service_name || s.name;
+const svcName = (s) => (st.lang !== 'en' && (s[`service_name_${st.lang}`] || s[`name_${st.lang}`])) || s.service_name || s.name;
+const svcDesc = (s) => (st.lang !== 'en' && s[`description_${st.lang}`]) || s.description || '';
 const priceLabel = (s) => s.price_type === 'estimate' ? L().estimate
   : s.price_type === 'hourly' ? `${money(s.base_price_cents)} ${L().hourly}` : `${L().flat} · ${money(s.base_price_cents)}`;
 
 function chrome() {
-  document.documentElement.lang = st.lang;
+  document.documentElement.lang = st.lang === 'pt' ? 'pt-BR' : st.lang;
   document.querySelectorAll('[data-lang]').forEach((b) => b.classList.toggle('active', b.dataset.lang === st.lang));
   document.getElementById('tagline').textContent = L().tagline;
   const em = st.info.emergency_phone;
@@ -112,7 +152,7 @@ function bookView() {
   if (st.step === 1) {
     return `${stepsBar()}<div class="panel"><p class="info-box">${esc(l.zipYes(`${st.city} (${st.zip})`))}</p><h1>${esc(l.svcTitle)}</h1>
       <div class="choices">${st.services.map((s) => `<button type="button" class="choice ${st.service?.id === s.id ? 'active' : ''}" data-svc="${s.id}">
-        <strong>${esc(svcName(s))}</strong><small>${esc(s.description || '')}</small><span class="price">${esc(priceLabel(s))}</span></button>`).join('')}</div>
+        <strong>${esc(svcName(s))}</strong><small>${esc(svcDesc(s))}</small><span class="price">${esc(priceLabel(s))}</span></button>`).join('')}</div>
       <div class="row"><button class="btn" data-back>${esc(l.back)}</button></div></div>`;
   }
   if (st.step === 2) {
@@ -135,7 +175,7 @@ function bookView() {
         <label class="wide">${esc(l.address)}<input name="address1" value="${esc(d.address1 || '')}" autocomplete="address-line1" required></label>
         <label>${esc(l.unit)}<input name="unit" value="${esc(d.unit || '')}" autocomplete="address-line2"></label>
         <label>${esc(l.city)}<input name="city" value="${esc(d.city || st.city.replace(/ \(.*\)$/, ''))}" autocomplete="address-level2" required></label>
-        <label>${esc(l.propType)}<select name="property_type">${Object.entries(types).map(([k, v]) => `<option value="${k}" ${d.property_type === k ? 'selected' : ''}>${esc(st.lang === 'es' ? PROP_ES[k] : v)}</option>`).join('')}</select></label>
+        <label>${esc(l.propType)}<select name="property_type">${Object.entries(types).map(([k, v]) => `<option value="${k}" ${d.property_type === k ? 'selected' : ''}>${esc(PROPS[st.lang]?.[k] || v)}</option>`).join('')}</select></label>
         <label data-units>${esc(l.units)}<input name="units_count" type="number" min="1" value="${esc(d.units_count || '')}"></label>
         <label class="wide">${esc(l.access)}<input name="access_notes" value="${esc(d.access_notes || '')}"></label>
         <label class="wide">${esc(l.problem)}<textarea name="problem" placeholder="${esc(l.problemPh)}" required>${esc(d.problem || '')}</textarea></label>

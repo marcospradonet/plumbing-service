@@ -46,6 +46,8 @@ export const STATUS = {
 };
 export const statusTag = (s) => `<span class="tag st st-${esc(s)}">${esc(STATUS[s] || s)}</span>`;
 export const prioTag = (p) => p === 'standard' ? '' : `<span class="tag prio-${esc(p)}">${p === 'emergency' ? 'Emergency' : 'Urgent'}</span>`;
+export const LANGUAGES = { en: 'English', es: 'Español', pt: 'Português' };
+export const langTag = (l) => l && l !== 'en' ? `<span class="tag">${LANGUAGES[l] || esc(l)}</span>` : '';
 export const PRICE_TYPES = { flat: 'Flat rate', hourly: 'Per hour', estimate: 'Free estimate' };
 
 // ---- Toasts

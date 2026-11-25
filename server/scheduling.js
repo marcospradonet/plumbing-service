@@ -20,7 +20,7 @@ export const JOB_SELECT = `
   SELECT j.*, c.name customer_name, c.company customer_company, c.type customer_type, c.phone customer_phone,
     c.email customer_email, c.language customer_language, c.sms_opt_in,
     p.address1, p.unit, p.city, p.state, p.zip, p.property_type, p.units_count, p.access_notes,
-    s.name service_name, s.name_es service_name_es, s.category service_category, s.price_type, s.base_price_cents,
+    s.name service_name, s.name_es service_name_es, s.name_pt service_name_pt, s.category service_category, s.price_type, s.base_price_cents,
     t.name technician_name, t.color technician_color, t.phone technician_phone
   FROM jobs j
   JOIN customers c ON c.id = j.customer_id

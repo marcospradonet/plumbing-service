@@ -253,3 +253,28 @@ describe('reminders and outbox', () => {
     assert.equal(db.prepare(`SELECT COUNT(*) n FROM notifications WHERE job_id = ? AND channel = 'email'`).get(j.id).n, 1);
   });
 });
+
+describe('Portuguese (pt-BR)', () => {
+  test('services carry Portuguese names and descriptions', async () => {
+    const list = (await anon('/public/services')).body;
+    const drain = list.find((s) => s.name === 'Drain cleaning');
+    assert.equal(drain.name_pt, 'Desentupimento de ralos e pias');
+    assert.match(drain.description_pt, /Entupimento/);
+  });
+
+  test('booking in Portuguese stores the language and sends Portuguese messages', async () => {
+    const r = await anon('/public/bookings', {
+      method: 'POST',
+      body: booking({
+        starts_at: `${TUE}T14:00`,
+        customer: { type: 'residential', name: 'Ana Souza', phone: '(305) 555-0170', email: 'ana.souza@example.com', language: 'pt', sms_opt_in: true },
+      }),
+    });
+    assert.equal(r.status, 201, JSON.stringify(r.body));
+    assert.equal(r.body.service_name_pt, 'Desentupimento de ralos e pias');
+    const job = db.prepare('SELECT * FROM jobs WHERE ref = ?').get(r.body.ref);
+    assert.equal(db.prepare('SELECT language FROM customers WHERE id = ?').get(job.customer_id).language, 'pt');
+    const sms = db.prepare(`SELECT body FROM notifications WHERE job_id = ? AND channel = 'sms'`).get(job.id);
+    assert.match(sms.body, /seu atendimento de Desentupimento de ralos e pias está agendado para ter, 8 dez/);
+  });
+});

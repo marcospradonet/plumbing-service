@@ -41,10 +41,12 @@ export function minutesBetween(a, b) {
   return Math.round((parseDateTime(b) - parseDateTime(a)) / 60000);
 }
 
-const DAYS = { en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], es: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] };
+const DAYS = { en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], es: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+  pt: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'] };
 const MONTHS = {
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   es: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+  pt: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
 };
 /** "9:30 AM" */
 export function time12(s) {
@@ -54,6 +56,7 @@ export function time12(s) {
 /** "Tue, Nov 25" / "mar 25 nov" */
 export function describeDate(s, lang = 'en') {
   const d = parseDateTime(s);
+  if (lang === 'pt') return `${DAYS.pt[d.getDay()]}, ${d.getDate()} ${MONTHS.pt[d.getMonth()]}`;
   return lang === 'es'
     ? `${DAYS.es[d.getDay()]} ${d.getDate()} ${MONTHS.es[d.getMonth()]}`
     : `${DAYS.en[d.getDay()]}, ${MONTHS.en[d.getMonth()]} ${d.getDate()}`;
