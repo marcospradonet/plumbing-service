@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a plumber online</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230b5cab'/><path d='M16 6c4 6 7 9.5 7 13a7 7 0 0 1-14 0c0-3.5 3-7 7-13z' fill='%237dd3fc'/></svg>">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/book.css">
+</head>
+<body class="book-page">
+  <header class="book-top">
+    <div class="book-wrap row">
+      <div class="brand"><span class="logo" id="logo"></span><div><strong id="biz">Plumbing Service</strong><small id="tagline"></small></div></div>
+      <div class="row" style="margin-left:auto">
+        <div class="btn-group" role="group" aria-label="Language"><button class="btn btn-sm" data-lang="en">English</button><button class="btn btn-sm" data-lang="es">Español</button></div>
+      </div>
+    </div>
+  </header>
+  <div class="emergency"><div class="book-wrap" id="emergency"></div></div>
+  <main class="book-wrap" id="book"><div class="loading">Loading…</div></main>
+  <footer class="book-wrap book-foot" id="foot"></footer>
+  <div id="toasts" aria-live="polite"></div>
+  <script type="module" src="/js/book.js"></script>
+</body>
+</html>
